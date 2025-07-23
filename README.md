@@ -1,6 +1,7 @@
-# Traj-timeGAN: 轨迹数据生成与评估框架
+# Traj-timeGAN: 轨迹数据生成与评估
 
 Traj-timeGAN是一个基于GAN（生成对抗网络）的轨迹数据生成模型。
+这是一个本科毕业设计，生成效果一般，但反正人生没有多少观众，故将拙作上传至个人仓库。
 
 ## 项目简介
 
@@ -139,3 +140,147 @@ Traj-timeGAN/
 3. 新增评估指标：
    - 在`src/metrics.py`的`MetricEvaluator`类中添加新的评估方法
    - 在`evaluate_all`方法中集成新指标
+
+# Traj-timeGAN: Trajectory Data Generation and Evaluation Framework
+
+Traj-timeGAN is a GAN (Generative Adversarial Network) based trajectory data generation model, specializing in generating high-quality temporal trajectory data (such as vehicle trajectories). This framework includes complete workflows for model training, data generation, visualization, and evaluation, supporting processing and analysis of various time-series datasets.
+
+ATTENTION: This is an undergraduate graduation project, and the results are average, but there is a popular saying in China: there aren’t many audience members in life. Therefore, I uploaded my humble work to my personal repository.
+
+## Project Overview
+
+Traj-timeGAN combines the advantages of time-series modeling and generative adversarial networks, enabling the generation of synthetic data with distributions similar to real trajectory data. Key features of this project include:
+
+- Support for multiple time-series datasets (HGV vehicle trajectory data, sine curve data, etc.)
+- Complete workflows for model training, data generation, and visualization
+- Built-in multiple evaluation metrics to quantify generated data quality
+- PCA and t-SNE for comparative visualization of data distributions
+
+## Environment Requirements
+
+The project depends on the following Python libraries:
+
+```
+numpy
+scikit-learn
+scikit-image
+torch
+matplotlib
+```
+
+## Installation Steps
+
+1. Clone this project to your local machine
+```bash
+git clone <project repository URL>
+cd Traj-timeGAN
+```
+
+2. Install dependency packages
+```bash
+pip install -r requirements.txt
+```
+
+## Dataset Preparation
+
+Two types of datasets are supported:
+- HGV vehicle trajectory data: filenames starting with `hgv_`
+- Sine curve data: filenames starting with `sine_`
+
+Datasets should be stored in `.npz` format, containing a `data` key with dimensions `(number of samples × time steps × number of features)`. Place datasets in the `data/` directory.
+
+## Usage
+
+Control the entire workflow through the `src/mainGAN.py` script, which supports four operation modes:
+
+- `train`: Train the model only
+- `generate`: Generate synthetic data only (requires pre-trained model)
+- `visualize`: Visualize real and synthetic data and calculate evaluation metrics
+- `all`: Execute training, generation, and visualization sequentially (default mode)
+
+### Basic Command Format
+
+```bash
+python src/mainGAN.py --dataset <dataset name> [--mode <operation mode>]
+```
+
+### Examples
+
+1. Complete workflow (training + generation + visualization)
+```bash
+python src/mainGAN.py --dataset hgv_trajectories_1 --mode all
+```
+
+2. Train model only
+```bash
+python src/mainGAN.py --dataset sine_subsampled_train_perc_2 --mode train
+```
+
+3. Generate synthetic data
+```bash
+python src/mainGAN.py --dataset hgv_trajectories_1 --mode generate
+```
+
+4. Data visualization and evaluation
+```bash
+python src/mainGAN.py --dataset sine_subsampled_train_perc_2 --mode visualize
+```
+
+## Project Structure
+
+```
+Traj-timeGAN/
+├── data/                 # Dataset directory
+├── outputs/              # Output results directory
+│   └── <dataset name>/
+│       ├── generated_data/  # Generated synthetic data
+│       ├── models/          # Trained models
+│       └── visualization/   # Visualization results and evaluation metrics
+├── src/
+│   ├── data_loaders/     # Data loaders
+│   │   └── data_loader.py  # Data loading and preprocessing
+│   ├── models/           # Model definitions
+│   │   └── traj_timegan.py # GAN model structure
+│   ├── mainGAN.py        # Main control program
+│   ├── metrics.py        # Evaluation metrics implementation
+│   ├── train.py          # Model training logic
+│   └── utils.py          # Utility functions
+├── requirements.txt      # Dependencies list
+└── tsne.py               # Additional t-SNE visualization script
+```
+
+## Model Architecture
+
+- **Generator**: Based on a bidirectional LSTM network, generates time-series data from random noise
+- **Discriminator**: Uses 1D convolutional networks to distinguish between real and generated data
+- **Training Strategy**: Standard GAN adversarial training, alternately optimizing generator and discriminator
+
+## Evaluation Metrics
+
+The system provides multiple quantitative evaluation metrics. Evaluation results are saved in `outputs/<dataset name>/visualization/evaluation_results.txt`:
+
+- **Jensen-Shannon Divergence**: Measures similarity between real and generated data distributions
+- **Predictive Score**: Evaluates temporal prediction capability of generated data
+- **Discriminative Score**: Measures realism of generated data (lower is better)
+- **Feature Variance Difference**: Compares feature variances between real and generated data
+
+## Visualization Results
+
+Visualization results are saved in the `outputs/<dataset name>/visualization/` directory:
+
+- `pca_tsne.png`: Contains both PCA and t-SNE dimensionality reduction visualizations, comparing distributions of real data (blue) and generated data (red)
+
+## Extension and Customization
+
+1. Adding new dataset types:
+   - Implement new dataset loaders in `data_loaders/data_loader.py`
+   - Inherit `BaseDataLoader` and implement the `_preprocess` method
+
+2. Adjusting model parameters:
+   - Generator parameters can be modified in the `Generator` class in `models/traj_timegan.py`
+   - Discriminator parameters can be modified in the `Discriminator` class in `models/traj_timegan.py`
+   - Training parameters (batch size, learning rate, etc.) can be adjusted in the `TrajTimeGANTrainer` class in `src/train.py`
+
+3. Adding new evaluation metrics:
+   - Add new evaluation methods in the `MetricEvaluator` class in `src/metrics.py`
+   - Integrate new metrics in the `evaluate_all` method
